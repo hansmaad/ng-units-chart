@@ -1,0 +1,81 @@
+
+
+.ng-units-chart-axes {
+    position: relative;
+}
+
+.ng-units-chart-axis {
+    z-index: 100;
+    position: absolute;
+    text-align: center;
+}
+
+.ng-units-chart-axis-y {
+    transform: rotate(-90deg);
+    transform-origin: 0 0;
+}
+
+.ng-units-select-transparent {
+    font-weight: 700;
+}
+
+.ng-units-chart-legend {
+    width:100%;
+    text-align: center;
+    ul {
+        margin: 2px auto;
+        line-height: 1.4;
+        list-style:none;
+        li {
+            cursor: pointer;
+            display: inline;
+            margin-right:20px;
+            a { white-space: nowrap; }
+            a:hover {
+                text-decoration:none;
+            }
+        }
+    }
+}
+
+.ng-units-chart-btn {
+    height: 10px;
+    display:inline-block;
+    width: 10px;
+}
+
+.ng-units-chart-hidden a {
+    color:#aaa;
+}
+
+.ng-units-chart-hidden .ng-units-chart-btn  {
+    // chart legend
+    opacity: 0.1;
+    border: 1px solid #000
+}
+
+.ct-zoom-rect {
+    fill: rgba(100, 160, 200, 0.3);
+    stroke: #999;
+}
+
+.ct-label {
+    color: #333;
+    fill: #333;
+    font-size: 14px;
+    padding: 0 2px;
+}
+
+.ct-point { stroke-width:8px;}
+.ct-line { stroke-width:3px;}
+
+ng-units-chart {
+    position: relative;
+    display: block;
+}
+
+.ng-units-chart-zoom {
+    position: absolute;
+    top: 20px;
+    right: 8px;
+}
