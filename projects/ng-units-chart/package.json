@@ -1,8 +1,8 @@
 {
   "name": "ng-units-chart",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "license": "MIT",
-  "description": "A tiny Angular module for range validation on inputs.",
+  "description": "Angular module with a chart component build on Chartist and ng-units.",
   "keywords": ["Angular", "Library"],
   "repository": {
     "type": "git",
