@@ -51,8 +51,8 @@ export class NgUnitsChartComponent implements OnInit, OnDestroy, OnChanges {
   @Input() options?: ChartOptions;
   @Input() classes: ChartClasses = {}
 
-  @ViewChild('chart') chartRef: ElementRef;
-  @ViewChild('axesHost') axesHost: ElementRef;
+  @ViewChild('chart', { static: true }) chartRef: ElementRef;
+  @ViewChild('axesHost', { static: true }) axesHost: ElementRef;
 
   resetZoom: () => void;
   chart: Chartist.IChartistLineChart;
