@@ -8,11 +8,12 @@ export interface ChartOptions extends Chartist.ILineChartOptions {
 
 }
 
-export type ChartData = Array<Array<{x: number, y: number}>>;
+// export type ChartData = Array<Array<{x: number, y: number}>>;
 
 export interface ChartSeries {
     label: string;
-    data: Array<{x: number, y: number}>;
+    data: Array<{ x: number, y: number }>;
+    hidden?: boolean;
 }
 
 export interface ChartClasses {
@@ -36,183 +37,199 @@ const colors = [
 ];
 
 @Component({
-  selector: 'ng-units-chart',
-  templateUrl: './units-chart.component.html',
-  styleUrls: ['./units-chart.component.scss'],
-  encapsulation: ViewEncapsulation.None,
+    selector: 'ng-units-chart',
+    templateUrl: './units-chart.component.html',
+    styleUrls: ['./units-chart.component.scss'],
+    encapsulation: ViewEncapsulation.None,
 })
 export class NgUnitsChartComponent implements OnInit, OnDestroy, OnChanges {
 
-  @Input() series: ChartSeries[];
-  @Input() axisTitleY: boolean|string = false;
-  @Input() axisTitleX: boolean|string = false;
-  @Input() quantityX: string;
-  @Input() quantityY: string;
-  @Input() options?: ChartOptions;
-  @Input() classes: ChartClasses = {}
+    @Input() series: ChartSeries[];
+    @Input() axisTitleY: boolean | string = false;
+    @Input() axisTitleX: boolean | string = false;
+    @Input() quantityX: string;
+    @Input() quantityY: string;
+    @Input() scaleX = 'linear';
+    @Input() scaleY = 'log10';
+    @Input() options?: ChartOptions;
+    @Input() classes: ChartClasses = {};
 
-  @ViewChild('chart', { static: true }) chartRef: ElementRef;
-  @ViewChild('axesHost', { static: true }) axesHost: ElementRef;
+    @ViewChild('chart', { static: true }) chartRef: ElementRef;
+    @ViewChild('axesHost', { static: true }) axesHost: ElementRef;
 
-  resetZoom: () => void;
-  chart: Chartist.IChartistLineChart;
-  subscriptions: Subscription[] = [];
-
-
-  constructor(private systemOfUnits: SystemOfUnits) { }
-
-  ngOnInit() {
-      const qx = this.systemOfUnits.get(this.quantityX);
-      const qy = this.systemOfUnits.get(this.quantityY);
-      this.subscriptions = [
-          this.systemOfUnits.subscribe(qx, () => this.draw()),
-          this.systemOfUnits.subscribe(qy, () => this.draw()),
-      ];
-  }
-
-  ngOnDestroy() {
-      this.subscriptions.forEach(s => s.unsubscribe());
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-      this.draw();
-  }
-
-  draw() {
-      console.log('Redraw');
-      if (!this.series) {
-          console.log('No data, skip');
-          return;
-      }
-      const formatter = QuantityFormatters['default'];
-      const defaultAxis = {
-          labelInterpolationFnc: formatter,
-          type: Chartist.AutoScaleAxis,
-          onlyInteger: false,
-          scaleMinSpace: 50,
-      };
-
-      let options = {
-          height: '100%',
-          lineSmooth: true,
-          fullWidth: true,
-          showPoint: false,
-          showGridBackground: true,
-          chartPadding: {
-              right: 2,  // protect last grid line from disappear in some cases
-              left: this.axisTitleY === false ? 0 : 40,
-              bottom: this.axisTitleX === false ? 0 : 40,
-          },
-          plugins: [
-              Chartist.plugins.zoom({
-                  onZoom : (chart, resetFn) => this.resetZoom = () => {
-                      resetFn();
-                      this.resetZoom = null;
-                  }
-              })],
-          axisY: Object.assign({
-              scale: 'log10',
-              offset: 60,
-              labelOffset: {
-                  y: 7,
-              }
-          }, defaultAxis),
-          axisX: Object.assign({
-              type: Chartist.AutoScaleAxis,
-          }, defaultAxis)
-      };
-
-      options = Object.assign(options, this.options);
+    resetZoom: () => void;
+    chart: Chartist.IChartistLineChart;
+    subscriptions: Subscription[] = [];
 
 
-      this.chart = new Chartist.Line(this.chartRef.nativeElement, {
-          series: this.map(this.series)
-      }, options);
+    constructor(private systemOfUnits: SystemOfUnits) { }
 
-      this.chart.on('created', (data) => this.positionAxisTitles(data))
-          .on('draw', (data) => this.onDraw(data));
-  }
+    ngOnInit() {
+        const qx = this.systemOfUnits.get(this.quantityX);
+        const qy = this.systemOfUnits.get(this.quantityY);
+        const draw = () => this.draw();
+        this.subscriptions = [
+            this.systemOfUnits.subscribe(qx, draw),
+            this.systemOfUnits.subscribe(qy, draw),
+        ];
+    }
 
-  map(data: ChartSeries[]): any[] {
-      if (!data) {
-          return [];
-      }
-      const qx = this.systemOfUnits.get(this.quantityX);
-      const qy = this.systemOfUnits.get(this.quantityY);
-      return data.map(s => s.data.map(xy => {
-          return {
-              x: qx ? qx.fromBase(xy.x) : xy.x,
-              y: qy ? qy.fromBase(xy.y) : xy.y,
-          };
-      }));
-  }
+    ngOnDestroy() {
+        this.subscriptions.forEach(s => s.unsubscribe());
+    }
 
-  onDraw(data) {
-      this.setColor(data);
-  }
+    ngOnChanges(changes: SimpleChanges): void {
+        this.draw();
+    }
 
-  setColor(data, index?: number) {
-      const types = ['line', 'point', 'bar', 'slice'];
-      if (types.indexOf(data.type) >= 0) {
-          // const i = index === undefined ? visibleIndex(this.visibilities, data.seriesIndex) : index;
-          const i = index === undefined ? data.seriesIndex : index;
-          const style = data.element.attr('style');
-          data.element.attr({ 'style': style + ';stroke:' + this.getColor(i) });
-      }
-  }
+    draw() {
+        if (!this.series) {
+            return;
+        }
+        const formatter = QuantityFormatters['default'];
+        const defaultAxis = {
+            labelInterpolationFnc: formatter,
+            type: Chartist.AutoScaleAxis,
+            onlyInteger: false,
+            scaleMinSpace: 50,
+        };
 
-  getColor(index) {
-      return colors[index] || '#ccc';
-  }
+        let options = {
+            height: '100%',
+            lineSmooth: false,
+            fullWidth: true,
+            showPoint: false,
+            showGridBackground: true,
+            classNames: {
+                gridMinor: 'ct-grid-minor'
+            },
+            chartPadding: {
+                right: 3,  // protect last grid line from disappear in some cases
+                left: this.axisTitleY === false ? 0 : 40,
+                bottom: this.axisTitleX === false ? 0 : 40,
+            },
+            plugins: [
+                Chartist.plugins.zoom({
+                    onZoom: (chart, resetFn) => this.resetZoom = () => {
+                        resetFn();
+                        this.resetZoom = null;
+                    }
+                })],
+            axisY: Object.assign({
+                scale: this.scaleY,
+                offset: 60,
+                showMinorGrid: true,
+                labelOffset: {
+                    y: 7,
+                }
+            }, defaultAxis),
+            axisX: Object.assign({
+                scale: this.scaleX,
+                showMinorGrid: true,
+            }, defaultAxis)
+        };
 
-  protected positionAxisTitles(data) {
+        options = Object.assign(options, this.options);
 
-      const axes = this.axesHost.nativeElement;
-      const titleX = axes.querySelector('.ng-units-chart-axis-x') as HTMLHtmlElement;
-      const titleY = axes.querySelector('.ng-units-chart-axis-y') as HTMLHtmlElement;
+        this.chart = new Chartist.Line(this.chartRef.nativeElement, {
+            series: this.map(this.series)
+        }, options as Chartist.ILineChartOptions);
 
-      if (!titleX || !titleY) {
-          return;
-      }
+        this.chart
+            .on('created', (data) => this.positionAxisTitles(data))
+            .on('draw', (data) => this.onDraw(data));
+    }
 
-      const Y_AXIS_OFFSET_X = 15;
-      const X_AXIS_OFFSET_Y = 35;
+    toggle(s: ChartSeries) {
+        s.hidden = !s.hidden;
+        this.update();
+    }
 
-      let axisYLength = data.axisY.axisLength;
-      let dataOptions = data.options;
-      let chartPadding = dataOptions.chartPadding;
+    private update() {
+        this.chart.update({
+            series: this.map(this.series)
+        });
+    }
 
-      let topY = chartPadding.top + axisYLength;
-      let leftY = Y_AXIS_OFFSET_X;
+    private map(data: ChartSeries[]): any[] {
+        if (!data) {
+            return [];
+        }
+        const qx = this.systemOfUnits.get(this.quantityX);
+        const qy = this.systemOfUnits.get(this.quantityY);
+        return data.filter(s => !s.hidden).map(s => s.data.map(xy => {
+            return {
+                x: qx ? qx.fromBase(xy.x) : xy.x,
+                y: qy ? qy.fromBase(xy.y) : xy.y,
+            };
+        }));
+    }
 
-      let topX = chartPadding.top + axisYLength + X_AXIS_OFFSET_Y;
-      let leftX = dataOptions.axisY.offset + chartPadding.left;
+    private onDraw(data) {
+        this.setColor(data);
+    }
 
-      titleX.style.top = topX + 'px';
-      titleX.style.left = leftX + 'px';
-      titleX.style.width = data.axisX.axisLength + 'px';
+    private setColor(data) {
+        const types = ['line', 'point', 'bar', 'slice'];
+        if (types.indexOf(data.type) >= 0) {
+            const i = this.visibleIndex(data.seriesIndex);
+            const style = data.element.attr('style');
+            data.element.attr({ 'style': style + ';stroke:' + this.getColor(i) });
+        }
+    }
 
-      titleY.style.left = leftY + 'px';
-      titleY.style.top = topY + 'px';
-      titleY.style.width = axisYLength + 'px';
-  }
+    private visibleIndex(renderedIndex: number): number {
+        let count = renderedIndex;
+        const series = this.series;
+        for (let i = 0, length = series.length; i < length; ++i) {
+            if (!series[i].hidden && --count < 0) {
+                return i;
+            }
+        }
+        return renderedIndex;
+    }
 
-  legendClass(index) {
-      return '';
-      // return this.visibilities[index] === false ? 'chart-hidden' : '';
-  }
+    getColor(index) {
+        return colors[index] || '#ccc';
+    }
 
-  legendStyle(index) {
-      return { 'background-color': index >= 0 ? this.getColor(index) : '#ccc' };
-  }
-}
+    protected positionAxisTitles(data) {
 
-function visibleIndex(visibilities: boolean[], renderedIndex: number): number {
-  let count = renderedIndex;
-  for (let i = 0, length = visibilities.length; i < length; ++i) {
-      if (visibilities[i] !== false && --count < 0) {
-          return i;
-      }
-  }
-  return renderedIndex;
+        const axes = this.axesHost.nativeElement;
+        const titleX = axes.querySelector('.ng-units-chart-axis-x') as HTMLHtmlElement;
+        const titleY = axes.querySelector('.ng-units-chart-axis-y') as HTMLHtmlElement;
+
+        if (!titleX || !titleY) {
+            return;
+        }
+
+        const Y_AXIS_OFFSET_X = 15;
+        const X_AXIS_OFFSET_Y = 35;
+
+        const axisYLength = data.axisY.axisLength;
+        const dataOptions = data.options;
+        const chartPadding = dataOptions.chartPadding;
+
+        const topY = chartPadding.top + axisYLength;
+        const leftY = Y_AXIS_OFFSET_X;
+
+        const topX = chartPadding.top + axisYLength + X_AXIS_OFFSET_Y;
+        const leftX = dataOptions.axisY.offset + chartPadding.left;
+
+        titleX.style.top = topX + 'px';
+        titleX.style.left = leftX + 'px';
+        titleX.style.width = data.axisX.axisLength + 'px';
+
+        titleY.style.left = leftY + 'px';
+        titleY.style.top = topY + 'px';
+        titleY.style.width = axisYLength + 'px';
+    }
+
+    legendClass(index) {
+        return this.series[index].hidden ? 'ng-units-chart-hidden' : '';
+    }
+
+    legendStyle(index) {
+        return { 'background-color': index >= 0 ? this.getColor(index) : '#ccc' };
+    }
 }

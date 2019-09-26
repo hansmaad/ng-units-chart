@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { AppComponent } from './app.component';
-import { NgUnitsChartModule } from './ng-units-chart';
+import { NgUnitsChartModule } from 'ng-units-chart';
 import { NgUnitsModule, pressure, time } from 'ng-units';
 
 import 'chartist';

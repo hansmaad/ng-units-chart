@@ -1,4 +1,7 @@
-
+.ng-units-chart {
+    position: relative;
+    display: block;
+}
 
 .ng-units-chart-axes {
     position: relative;
@@ -20,43 +23,53 @@
 }
 
 .ng-units-chart-legend {
-    width:100%;
+    width: 100%;
     text-align: center;
+    overflow: hidden;
     ul {
         margin: 2px auto;
         line-height: 1.4;
-        list-style:none;
+        list-style: none;
         li {
             cursor: pointer;
             display: inline;
-            margin-right:20px;
-            a { white-space: nowrap; }
+            margin-right: 20px;
+            a {
+                white-space: nowrap;
+            }
             a:hover {
-                text-decoration:none;
+                text-decoration: none;
             }
         }
     }
 }
 
+.ng-units-chart-zoom {
+    position: absolute;
+    top: 20px;
+    right: 8px;
+}
+
 .ng-units-chart-btn {
     height: 10px;
-    display:inline-block;
+    display: inline-block;
     width: 10px;
+    margin-right: 0.4em;
 }
 
 .ng-units-chart-hidden a {
-    color:#aaa;
+    color: #aaa;
 }
 
-.ng-units-chart-hidden .ng-units-chart-btn  {
+.ng-units-chart-hidden .ng-units-chart-btn {
     // chart legend
     opacity: 0.1;
-    border: 1px solid #000
+    border: 1px solid #000;
 }
 
 .ct-zoom-rect {
-    fill: rgba(100, 160, 200, 0.3);
-    stroke: #999;
+    fill: rgba(200, 100, 100, 0.3);
+    stroke: red;
 }
 
 .ct-label {
@@ -69,13 +82,17 @@
 .ct-point { stroke-width:8px;}
 .ct-line { stroke-width:3px;}
 
-ng-units-chart {
-    position: relative;
-    display: block;
+.ct-grid {
+    shape-rendering: crispEdges;
+    stroke: rgba(0, 0, 0, 0.3);
+    stroke-width: 1px;
+    stroke-dasharray: none;
 }
 
-.ng-units-chart-zoom {
-    position: absolute;
-    top: 20px;
-    right: 8px;
+.ct-grid.ct-grid-minor {
+    stroke: rgba(0, 0, 0, 0.2);
+    stroke-width: 1px;
+    stroke-dasharray: 2px;
 }
+
+

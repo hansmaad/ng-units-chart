@@ -1,25 +1,27 @@
-
-<div #axesHost class="ng-units-chart-axes">
-  <div class="ng-units-chart-axis ng-units-chart-axis-x" *ngIf="axisTitleX !== false">
-    <span>{{axisTitleX}}</span>
-    (<select class="{{classes.select}}" [ngUnitSelect]="quantityX"></select>)
+<div class="ng-units-chart">
+  <div #axesHost class="ng-units-chart-axes">
+    <div class="ng-units-chart-axis ng-units-chart-axis-x" *ngIf="axisTitleX !== false">
+      <span>{{axisTitleX}}</span>
+      (<select class="{{classes.select}}" [ngUnitSelect]="quantityX"></select>)
+    </div>
+    <div class="ng-units-chart-axis ng-units-chart-axis-y" *ngIf="axisTitleY !== false">
+      <span>{{axisTitleY}}</span>
+      (<select class="{{classes.select}}" [ngUnitSelect]="quantityY"></select>)
+    </div>
   </div>
-  <div class="ng-units-chart-axis ng-units-chart-axis-y" *ngIf="axisTitleY !== false">
-    <span>{{axisTitleY}}</span>
-    (<select class="{{classes.select}}" [ngUnitSelect]="quantityY"></select>)
+  <div #chart class="ct-chart ct-golden-section"></div>
+  <div class="ng-units-chart-zoom">
+    <button type="button" class="{{classes.btn}}" *ngIf="resetZoom" (click)="resetZoom()">
+    </button>
   </div>
-</div>
-<div #chart class="ct-chart ct-golden-section"></div>
-<div class="ng-units-chart-zoom">
-    <button type="button" class="{{classes.btn}}" *ngIf="resetZoom" (click)="resetZoom()">RESET ZOOM</button>
-</div>
-
-<div class="ng-units-chart-legend">
-  <ul>
-    <li *ngFor="let s of series; let i = index" [ngClass]="legendClass(i)">
-      <a>
-        <span class="ng-units-chart-btn" [ngStyle]="legendStyle(i)"></span> {{s.label}}
-      </a>
-    </li>
-  </ul>
+  <div class="ng-units-chart-legend">
+    <ul>
+      <li *ngFor="let s of series; let i = index" [ngClass]="legendClass(i)">
+        <a href="javascript:void(0)" (click)="toggle(s)">
+          <span class="ng-units-chart-btn" [ngStyle]="legendStyle(i)"></span>
+          <span>{{s.label}}</span>
+        </a>
+      </li>
+    </ul>
+  </div>
 </div>
