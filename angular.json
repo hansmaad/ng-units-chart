@@ -61,8 +61,7 @@
               "projects/ng-units-chart-example/src/styles.css",
               "./node_modules/chartist/dist/chartist.css"
             ],
-            "scripts": [],
-            "es5BrowserSupport": true
+            "scripts": []
           },
           "configurations": {
             "production": {
